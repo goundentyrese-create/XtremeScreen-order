@@ -345,7 +345,7 @@
   </div>
 
   <script>
-    // Updated Apps Script Web App backend URL
+    // Connected to your Apps Script Web App backend
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwWRO2pZGz8eX1fS7_Ft8oo0haGt_iyf1YcQnhuRysAVpOntUVTTp7MterLsATLtTffA/exec";
 
     const rows = ['A', 'B', 'C'];
@@ -366,3 +366,106 @@
 
         // Left 5 seats
         const leftGroup = document.createElement('div');
+        leftGroup.className = 'seats-group';
+        for (let i = 1; i <= 5; i++) {
+          leftGroup.appendChild(createSeatElement(`${rowLabel}${i}`));
+        }
+        rowDiv.appendChild(leftGroup);
+
+        // Middle Aisle
+        const aisle = document.createElement('div');
+        aisle.className = 'aisle';
+        rowDiv.appendChild(aisle);
+
+        // Right 5 seats
+        const rightGroup = document.createElement('div');
+        rightGroup.className = 'seats-group';
+        for (let i = 6; i <= 10; i++) {
+          rightGroup.appendChild(createSeatElement(`${rowLabel}${i}`));
+        }
+        rowDiv.appendChild(rightGroup);
+
+        seatingGrid.appendChild(rowDiv);
+      });
+    }
+
+    function createSeatElement(seatId) {
+      const seat = document.createElement('div');
+      seat.className = 'seat';
+      seat.innerText = seatId;
+      seat.dataset.id = seatId;
+
+      if (takenSeats.includes(seatId)) {
+        seat.classList.add('taken');
+      } else {
+        seat.addEventListener('click', () => {
+          if (seat.classList.contains('taken')) return;
+          document.querySelectorAll('.seat:not(.taken)').forEach(s => s.classList.remove('selected'));
+          seat.classList.add('selected');
+          selectedSeat = seatId;
+          document.getElementById('selectedSeatInput').value = seatId;
+        });
+      }
+      return seat;
+    }
+
+    async function fetchTakenSeats() {
+      try {
+        const response = await fetch(APPS_SCRIPT_URL);
+        const data = await response.json();
+        takenSeats = data.takenSeats || [];
+        buildGrid();
+      } catch (err) {
+        console.error("Could not fetch seat data", err);
+      }
+    }
+
+    buildGrid();
+    fetchTakenSeats();
+    setInterval(fetchTakenSeats, 5000);
+
+    document.getElementById('orderForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('studentName').value;
+      const seat = document.getElementById('selectedSeatInput').value;
+
+      if (!seat) {
+        alert('Please select an available seat from the seating chart.');
+        return;
+      }
+
+      const milkshake = document.getElementById('milkshakeSelect').value;
+      const softDrink = document.getElementById('softDrinkSelect').value;
+      const tea = document.getElementById('teaSelect').value;
+      const snacks = Array.from(document.querySelectorAll('.snack-check:checked')).map(cb => cb.value);
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.innerText = "Submitting...";
+      submitBtn.disabled = true;
+
+      const payload = {
+        name,
+        seat,
+        milkshake,
+        softDrink,
+        tea,
+        snacks: snacks.join(', ')
+      };
+
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          document.getElementById('summaryName').innerHTML = `<strong>Student:</strong> ${name}`;
+          document.getElementById('summarySeat').innerHTML = `<strong>Selected Seat:</strong> ${seat}`;
+          
+          const drinksList = [milkshake, softDrink, tea].filter(d => d !== 'None').join(', ');
+          document.getElementById('summaryDrinks').innerHTML = `<strong>Drinks:</strong> ${drinksList || 'None'}`;
+          document.getElementById('summarySnacks').innerHTML = `<strong>Snacks:</strong> ${snacks.join(', ') || 'None'}`;
+
+          document.getElementById('orderForm').style.
