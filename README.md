@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Class Movie Day - Seat & Order Selection</title>
+  <title>XtremeScreen-order</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -345,7 +345,7 @@
   </div>
 
   <script>
-    // Connected to your Apps Script Web App backend
+    // Corrected Apps Script Web App backend URL
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwWRO2pZGz8eX1fS7_Ft8oo0haGt_iyf1YcQnhuRysAVpOntUVTTp7MterLsATLtTffA/exec";
 
     const rows = ['A', 'B', 'C'];
@@ -468,4 +468,21 @@
           document.getElementById('summaryDrinks').innerHTML = `<strong>Drinks:</strong> ${drinksList || 'None'}`;
           document.getElementById('summarySnacks').innerHTML = `<strong>Snacks:</strong> ${snacks.join(', ') || 'None'}`;
 
-          document.getElementById('orderForm').style.
+          document.getElementById('orderForm').style.display = 'none';
+          document.getElementById('summaryCard').classList.add('active');
+          document.getElementById('summaryCard').scrollIntoView({ behavior: 'smooth' });
+        } else {
+          alert('Error: ' + result.message);
+          submitBtn.innerText = "Submit Reservation";
+          submitBtn.disabled = false;
+          fetchTakenSeats();
+        }
+      } catch (err) {
+        alert('Network error. Please try again.');
+        submitBtn.innerText = "Submit Reservation";
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
