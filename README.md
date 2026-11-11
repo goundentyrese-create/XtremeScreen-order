@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class Movie Day - Seat & Order Selection</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -223,7 +224,7 @@
       accent-color: var(--accent);
     }
 
-    button.btn-submit {
+    button.btn-submit, button.btn-reset {
       width: 100%;
       padding: 0.85rem;
       background-color: var(--accent);
@@ -236,8 +237,12 @@
       transition: background-color 0.2s;
     }
 
-    button.btn-submit:hover {
+    button.btn-submit:hover, button.btn-reset:hover {
       background-color: var(--accent-hover);
+    }
+
+    button.btn-reset {
+      margin-top: 1.5rem;
     }
 
     .summary-card {
@@ -339,12 +344,12 @@
       <p style="margin-bottom: 0.5rem;" id="summaryName"></p>
       <p style="margin-bottom: 0.5rem;" id="summarySeat"></p>
       <p style="margin-bottom: 0.5rem;" id="summaryDrinks"></p>
-      <p id="summarySnacks"></p>
+      <p style="margin-bottom: 1rem;" id="summarySnacks"></p>
+      <button type="button" class="btn-reset" onclick="resetForm()">Make Another Order</button>
     </div>
   </div>
 
   <script>
-    // Corrected Apps Script Web App backend URL
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwWRO2pZGz8eX1fS7_Ft8oo0haGt_iyf1YcQnhuRysAVpOntUVTTp7MterLsATLtTffA/exec";
 
     const rows = ['A', 'B', 'C'];
@@ -482,6 +487,19 @@
         submitBtn.disabled = false;
       }
     });
+
+    function resetForm() {
+      document.getElementById('orderForm').reset();
+      document.getElementById('orderForm').style.display = 'block';
+      document.getElementById('summaryCard').classList.remove('active');
+      document.getElementById('selectedSeatInput').value = '';
+      selectedSeat = null;
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.innerText = "Submit Reservation";
+      submitBtn.disabled = false;
+      fetchTakenSeats();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   </script>
 </body>
 </html>
